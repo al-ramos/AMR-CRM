@@ -1,6 +1,8 @@
 using AMR.CRM.Infrastructure;
 using AMR.CRM.Infrastructure.Data;
 using AMR.CRM.API.Middleware;
+using AMR.CRM.Application.Behaviors;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -26,10 +28,14 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "AMR.CRM API", Version = "v1" });
 });
 
-// Application — MediatR
+// Application — MediatR + ValidationBehavior
+var appAssembly = typeof(AMR.CRM.Application.Contatos.Commands.CriarContatoCommand).Assembly;
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(
-        typeof(AMR.CRM.Application.Contatos.Commands.CriarContatoCommand).Assembly));
+{
+    cfg.RegisterServicesFromAssembly(appAssembly);
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
+builder.Services.AddValidatorsFromAssembly(appAssembly);
 
 // Infrastructure — DbContext + Repositórios
 builder.Services.AddInfrastructure(builder.Configuration);
