@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Users, TrendingUp, LayoutDashboard } from 'lucide-react'
+import { Users, TrendingUp, LayoutDashboard, Target } from 'lucide-react'
 
 export default function Sidebar() {
   return (
@@ -13,21 +13,27 @@ export default function Sidebar() {
 
       <ul className="nav flex-column gap-1">
         <li className="nav-item">
-          <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-            <LayoutDashboard size={16} />
-            Dashboard
+          <NavLink to="/dashboard"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <LayoutDashboard size={16} /> Dashboard
           </NavLink>
         </li>
         <li className="nav-item">
-          <NavLink to="/contatos" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-            <Users size={16} />
-            Contatos
+          <NavLink to="/leads"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <Target size={16} /> Leads
           </NavLink>
         </li>
         <li className="nav-item">
-          <NavLink to="/oportunidades" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-            <TrendingUp size={16} />
-            Oportunidades
+          <NavLink to="/contatos"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <Users size={16} /> Contatos
+          </NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink to="/oportunidades"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <TrendingUp size={16} /> Oportunidades
           </NavLink>
         </li>
       </ul>

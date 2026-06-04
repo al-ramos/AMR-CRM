@@ -4,51 +4,64 @@ namespace AMR.CRM.Domain.Entities;
 
 public class Oportunidade
 {
-    public Guid               Id          { get; private set; }
-    public Guid               ContatoId   { get; private set; }
-    public string             Titulo      { get; private set; } = default!;
-    public decimal            Valor       { get; private set; }
-    public StatusOportunidade Status      { get; private set; }
-    public string?            Descricao   { get; private set; }
+    public Guid               Id                 { get; private set; }
+    public Guid?              ContatoId          { get; private set; }   // opcional (legado)
+    public Guid?              LeadId             { get; private set; }   // FK para Lead
+    public string             Titulo             { get; private set; } = default!;
+    public decimal            Valor              { get; private set; }
+    public int                Probabilidade      { get; private set; }   // 0–100 %
+    public StatusOportunidade Status             { get; private set; }
+    public string?            Descricao          { get; private set; }
     public DateTime?          PrevisaoFechamento { get; private set; }
-    public DateTime           CriadoEm   { get; private set; }
-    public DateTime           AlteradoEm { get; private set; }
+    public DateTime           CriadoEm          { get; private set; }
+    public DateTime           AlteradoEm        { get; private set; }
 
     public Contato? Contato { get; private set; }
+    public Lead?    Lead    { get; private set; }
 
     private Oportunidade() { }
 
-    public static Oportunidade Criar(Guid contatoId, string titulo, decimal valor,
+    public static Oportunidade Criar(string titulo, decimal valor, int probabilidade = 50,
+        Guid? contatoId = null, Guid? leadId = null,
         string? descricao = null, DateTime? previsaoFechamento = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(titulo);
-        if (valor < 0) throw new ArgumentException("Valor não pode ser negativo.", nameof(valor));
+        if (valor < 0)         throw new ArgumentException("Valor não pode ser negativo.", nameof(valor));
+        if (contatoId is null && leadId is null)
+            throw new ArgumentException("Oportunidade deve ter Contato ou Lead.");
+        if (probabilidade is < 0 or > 100)
+            throw new ArgumentException("Probabilidade deve estar entre 0 e 100.", nameof(probabilidade));
 
         return new Oportunidade
         {
             Id                 = Guid.NewGuid(),
             ContatoId          = contatoId,
+            LeadId             = leadId,
             Titulo             = titulo.Trim(),
             Valor              = valor,
+            Probabilidade      = probabilidade,
             Status             = StatusOportunidade.Aberta,
             Descricao          = descricao?.Trim(),
             PrevisaoFechamento = previsaoFechamento,
             CriadoEm          = DateTime.UtcNow,
-            AlteradoEm         = DateTime.UtcNow
+            AlteradoEm        = DateTime.UtcNow
         };
     }
 
-    public void Atualizar(string titulo, decimal valor, string? descricao = null,
-        DateTime? previsaoFechamento = null)
+    public void Atualizar(string titulo, decimal valor, int probabilidade,
+        string? descricao = null, DateTime? previsaoFechamento = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(titulo);
         if (valor < 0) throw new ArgumentException("Valor não pode ser negativo.", nameof(valor));
+        if (probabilidade is < 0 or > 100)
+            throw new ArgumentException("Probabilidade deve estar entre 0 e 100.", nameof(probabilidade));
 
         Titulo             = titulo.Trim();
         Valor              = valor;
+        Probabilidade      = probabilidade;
         Descricao          = descricao?.Trim();
         PrevisaoFechamento = previsaoFechamento;
-        AlteradoEm         = DateTime.UtcNow;
+        AlteradoEm        = DateTime.UtcNow;
     }
 
     public void IniciarAndamento()

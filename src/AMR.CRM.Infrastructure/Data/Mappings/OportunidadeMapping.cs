@@ -11,6 +11,16 @@ public class OportunidadeMapping : IEntityTypeConfiguration<Oportunidade>
         b.HasKey(o => o.Id);
         b.Property(o => o.Titulo).HasMaxLength(300).IsRequired();
         b.Property(o => o.Valor).HasColumnType("decimal(18,2)");
+        b.Property(o => o.Probabilidade).HasDefaultValue(50);
         b.Property(o => o.Descricao).HasMaxLength(2000);
+
+        // ContatoId é nullable (FK legado, sem cascade)
+        b.HasOne(o => o.Contato)
+         .WithMany(c => c.Oportunidades)
+         .HasForeignKey(o => o.ContatoId)
+         .OnDelete(DeleteBehavior.Restrict)
+         .IsRequired(false);
+
+        // LeadId é nullable — a relação é configurada no LeadMapping
     }
 }

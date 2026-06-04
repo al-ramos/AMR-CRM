@@ -14,10 +14,11 @@ public class ListarOportunidadesQueryHandler(IOportunidadeRepository repo)
         return lista.Select(ToDto).ToList();
     }
 
-    private static OportunidadeDto ToDto(Oportunidade o) => new(
-        o.Id, o.ContatoId,
-        o.Contato?.Nome ?? "-",
-        o.Titulo, o.Valor,
+    internal static OportunidadeDto ToDto(Oportunidade o) => new(
+        o.Id,
+        o.ContatoId, o.Contato?.Nome,
+        o.LeadId,    o.Lead?.Nome,
+        o.Titulo, o.Valor, o.Probabilidade,
         o.Status, o.Status.ToString(),
         o.Descricao, o.PrevisaoFechamento, o.CriadoEm
     );

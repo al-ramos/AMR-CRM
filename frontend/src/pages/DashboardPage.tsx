@@ -1,28 +1,36 @@
 import { useQuery } from '@tanstack/react-query'
-import { Users, TrendingUp, CheckCircle, DollarSign } from 'lucide-react'
+import { Users, TrendingUp, CheckCircle, Target } from 'lucide-react'
 import { contatoApi } from '../api/contatoApi'
 import { oportunidadeApi, StatusOportunidade } from '../api/oportunidadeApi'
+import { leadApi, StatusLead } from '../api/leadApi'
+
+const fmtBRL = (v: number) =>
+  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
+
+const STATUS_LABEL: Record<number, string> = {
+  1: 'Novo', 2: 'Qualificado', 3: 'Proposta', 4: 'Ganho', 5: 'Perdido',
+}
+const STATUS_DOT: Record<number, string> = {
+  1: '#6c757d', 2: '#0dcaf0', 3: '#ffc107', 4: '#198754', 5: '#dc3545',
+}
 
 export default function DashboardPage() {
-  const { data: contatos = [] } = useQuery({
-    queryKey: ['contatos'],
-    queryFn: contatoApi.listar,
-  })
-  const { data: oportunidades = [] } = useQuery({
-    queryKey: ['oportunidades'],
-    queryFn: oportunidadeApi.listar,
-  })
+  const { data: contatos = [] } = useQuery({ queryKey: ['contatos'], queryFn: contatoApi.listar })
+  const { data: leads    = [] } = useQuery({ queryKey: ['leads'],    queryFn: () => leadApi.listar() })
+  const { data: ops      = [] } = useQuery({ queryKey: ['oportunidades'], queryFn: oportunidadeApi.listar })
 
-  const totalValor = oportunidades.reduce((s, o) => s + o.valor, 0)
-  const ganhas = oportunidades.filter(o => o.status === StatusOportunidade.Ganha).length
-  const abertas = oportunidades.filter(o => o.status === StatusOportunidade.Aberta).length
+  const leadsAtivos    = leads.filter(l => l.status !== StatusLead.Ganho && l.status !== StatusLead.Perdido)
+  const pipeline       = leadsAtivos.reduce((s, l) => s + l.valorEstimado, 0)
+  const ganhas         = ops.filter(o => o.status === StatusOportunidade.Ganha).length
+  const pipelineOp     = ops
+    .filter(o => o.status === StatusOportunidade.Aberta || o.status === StatusOportunidade.EmAndamento)
+    .reduce((s, o) => s + o.valor * (o.probabilidade / 100), 0)
 
   const kpis = [
-    { label: 'Contatos',        value: contatos.length,          icon: <Users size={28} />,       color: '#0d6efd' },
-    { label: 'Oportunidades',   value: oportunidades.length,     icon: <TrendingUp size={28} />,  color: '#fd7e14' },
-    { label: 'Ganhas',          value: ganhas,                   icon: <CheckCircle size={28} />, color: '#198754' },
-    { label: 'Pipeline (R$)',   value: `R$ ${totalValor.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`,
-                                                                  icon: <DollarSign size={28} />,  color: '#6f42c1' },
+    { label: 'Leads ativos',  value: leadsAtivos.length, icon: <Target size={26} />,     color: '#fd7e14' },
+    { label: 'Contatos',       value: contatos.length,    icon: <Users size={26} />,       color: '#0d6efd' },
+    { label: 'Op. ganhas',     value: ganhas,             icon: <CheckCircle size={26} />, color: '#198754' },
+    { label: 'Pipeline leads', value: fmtBRL(pipeline),  icon: <TrendingUp size={26} />,  color: '#6f42c1' },
   ]
 
   return (
@@ -48,45 +56,56 @@ export default function DashboardPage() {
       </div>
 
       <div className="row g-3">
-        <div className="col-lg-6">
-          <div className="card card-kpi p-3">
-            <h6 className="fw-semibold mb-3">Oportunidades Abertas ({abertas})</h6>
-            {oportunidades
-              .filter(o => o.status === StatusOportunidade.Aberta)
-              .slice(0, 5)
-              .map(o => (
-                <div key={o.id} className="d-flex justify-content-between align-items-center py-2 border-bottom">
-                  <div>
-                    <div className="fw-medium" style={{ fontSize: '0.9rem' }}>{o.titulo}</div>
-                    <small className="text-muted">{o.contatoNome}</small>
+        {/* Leads por status */}
+        <div className="col-lg-5">
+          <div className="card card-kpi p-3 h-100">
+            <h6 className="fw-semibold mb-3">Leads por status</h6>
+            {[1,2,3,4,5].map(s => {
+              const count = leads.filter(l => l.status === s).length
+              const pct   = leads.length ? Math.round(count / leads.length * 100) : 0
+              return (
+                <div key={s} className="mb-2">
+                  <div className="d-flex justify-content-between mb-1">
+                    <small className="fw-medium" style={{ color: STATUS_DOT[s] }}>
+                      ● {STATUS_LABEL[s]}
+                    </small>
+                    <small className="text-muted">{count}</small>
                   </div>
-                  <span className="badge bg-primary">
-                    R$ {o.valor.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
-                  </span>
+                  <div className="progress" style={{ height: 6 }}>
+                    <div className="progress-bar"
+                      style={{ width: `${pct}%`, background: STATUS_DOT[s] }} />
+                  </div>
                 </div>
-              ))}
-            {abertas === 0 && <p className="text-muted small mb-0">Nenhuma oportunidade aberta.</p>}
+              )
+            })}
           </div>
         </div>
 
-        <div className="col-lg-6">
-          <div className="card card-kpi p-3">
-            <h6 className="fw-semibold mb-3">Últimos Contatos</h6>
-            {contatos.slice(0, 5).map(c => (
-              <div key={c.id} className="d-flex align-items-center gap-3 py-2 border-bottom">
-                <div className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                  style={{ width: 36, height: 36, background: '#0d6efd', fontSize: '0.8rem', flexShrink: 0 }}>
-                  {c.nome.charAt(0).toUpperCase()}
+        {/* Pipeline Oportunidades */}
+        <div className="col-lg-7">
+          <div className="card card-kpi p-3 h-100">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h6 className="fw-semibold mb-0">Oportunidades em andamento</h6>
+              <span className="badge bg-primary">{fmtBRL(pipelineOp)} ponderado</span>
+            </div>
+            {ops
+              .filter(o => o.status === StatusOportunidade.Aberta || o.status === StatusOportunidade.EmAndamento)
+              .slice(0, 6)
+              .map(o => (
+                <div key={o.id} className="d-flex justify-content-between align-items-center py-2 border-bottom">
+                  <div>
+                    <div className="fw-medium" style={{ fontSize: '0.88rem' }}>{o.titulo}</div>
+                    <small className="text-muted">{o.leadNome ?? o.contatoNome ?? '—'}</small>
+                  </div>
+                  <div className="text-end">
+                    <div className="small fw-medium">{fmtBRL(o.valor)}</div>
+                    <small className="text-muted">{o.probabilidade}%</small>
+                  </div>
                 </div>
-                <div>
-                  <div className="fw-medium" style={{ fontSize: '0.9rem' }}>{c.nome}</div>
-                  <small className="text-muted">{c.empresa ?? c.email}</small>
-                </div>
-                <span className={`badge ms-auto ${c.status === 1 ? 'bg-success' : 'bg-secondary'}`}>
-                  {c.statusNome}
-                </span>
-              </div>
-            ))}
+              ))}
+            {ops.filter(o => o.status <= 2).length === 0 && (
+              <p className="text-muted small mb-0">Nenhuma oportunidade em aberto.</p>
+            )}
           </div>
         </div>
       </div>

@@ -2,10 +2,13 @@ import api from './axiosInstance'
 
 export interface OportunidadeDto {
   id: string
-  contatoId: string
-  contatoNome: string
+  contatoId?: string
+  contatoNome?: string
+  leadId?: string
+  leadNome?: string
   titulo: string
   valor: number
+  probabilidade: number
   status: number
   statusNome: string
   descricao?: string
@@ -14,19 +17,21 @@ export interface OportunidadeDto {
 }
 
 export interface CriarOportunidadeRequest {
-  contatoId: string
   titulo: string
   valor: number
+  probabilidade?: number
+  contatoId?: string
+  leadId?: string
   descricao?: string
   previsaoFechamento?: string
 }
 
 export const StatusOportunidade = {
-  Aberta: 1,
+  Aberta:      1,
   EmAndamento: 2,
-  Ganha: 3,
-  Perdida: 4,
-  Cancelada: 5,
+  Ganha:       3,
+  Perdida:     4,
+  Cancelada:   5,
 } as const
 
 export const oportunidadeApi = {

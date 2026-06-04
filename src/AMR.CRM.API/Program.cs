@@ -1,6 +1,10 @@
 using AMR.CRM.Infrastructure;
 using AMR.CRM.Infrastructure.Data;
 using AMR.CRM.API.Middleware;
+using AMR.CRM.Application.Behaviors;
+using AMR.CRM.Application.Leads.Commands;
+using FluentValidation;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -24,14 +28,20 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "AMR.CRM API", Version = "v1" });
+    c.EnableAnnotations();
 });
 
-// Application — MediatR
+// ── MediatR + ValidationBehavior ─────────────────────────────────────────────
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(
-        typeof(AMR.CRM.Application.Contatos.Commands.CriarContatoCommand).Assembly));
+{
+    cfg.RegisterServicesFromAssembly(typeof(CriarLeadCommand).Assembly);
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+});
 
-// Infrastructure — DbContext + Repositórios
+// ── FluentValidation ─────────────────────────────────────────────────────────
+builder.Services.AddValidatorsFromAssembly(typeof(CriarLeadCommand).Assembly);
+
+// ── Infrastructure ────────────────────────────────────────────────────────────
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // ── Rate Limiting ─────────────────────────────────────────────────────────────
@@ -55,11 +65,10 @@ builder.Services.AddRateLimiter(options =>
     };
 });
 
-// CORS
+// ── CORS ──────────────────────────────────────────────────────────────────────
 builder.Services.AddCors(opts =>
     opts.AddPolicy("AmrCrm", policy =>
-        policy.WithOrigins(
-                builder.Configuration["Cors:AllowedOrigins"] ?? "*")
+        policy.WithOrigins(builder.Configuration["Cors:AllowedOrigins"] ?? "*")
               .AllowAnyMethod()
               .AllowAnyHeader()));
 
@@ -77,7 +86,6 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Redirect raiz para Swagger em dev
 if (app.Environment.IsDevelopment())
     app.MapGet("/", () => Results.Redirect("/swagger/index.html")).ExcludeFromDescription();
 

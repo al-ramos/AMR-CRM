@@ -5,4 +5,5 @@
   <Project Path="src/AMR.CRM.Infrastructure/AMR.CRM.Infrastructure.csproj" />
   <Project Path="src/AMR.CRM.API/AMR.CRM.API.csproj" />
   <Project Path="tests/AMR.CRM.Domain.Tests/AMR.CRM.Domain.Tests.csproj" />
+  <Project Path="tests/AMR.CRM.Application.Tests/AMR.CRM.Application.Tests.csproj" />
 </Solution>
