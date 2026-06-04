@@ -27,7 +27,7 @@ public class CriarContatoCommandHandler(IContatoRepository repo, IUnitOfWork uow
             contato.Id, contato.Nome, contato.Email, contato.Telefone, contato.Empresa,
             contato.Tipo,   contato.Tipo.ToString(),
             contato.Status, contato.Status.ToString(),
-            contato.Notas,  contato.CriadoEm
+            contato.Notas, contato.CriadoEm
         ));
     }
 }

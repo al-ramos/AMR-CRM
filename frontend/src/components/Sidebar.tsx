@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Users, TrendingUp, LayoutDashboard } from 'lucide-react'
+import { Users, TrendingUp, LayoutDashboard, UserSearch } from 'lucide-react'
 
 export default function Sidebar() {
   return (
@@ -16,6 +16,12 @@ export default function Sidebar() {
           <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <LayoutDashboard size={16} />
             Dashboard
+          </NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink to="/leads" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <UserSearch size={16} />
+            Leads
           </NavLink>
         </li>
         <li className="nav-item">

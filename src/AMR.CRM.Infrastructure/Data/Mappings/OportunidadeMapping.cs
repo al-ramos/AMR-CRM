@@ -11,6 +11,7 @@ public class OportunidadeMapping : IEntityTypeConfiguration<Oportunidade>
         b.HasKey(o => o.Id);
         b.Property(o => o.Titulo).HasMaxLength(300).IsRequired();
         b.Property(o => o.Valor).HasColumnType("decimal(18,2)");
+        b.Property(o => o.Probabilidade).HasColumnType("decimal(5,2)").HasDefaultValue(0m);
         b.Property(o => o.Descricao).HasMaxLength(2000);
     }
 }

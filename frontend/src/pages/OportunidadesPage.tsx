@@ -113,6 +113,22 @@ export default function OportunidadesPage() {
                   <tr><td colSpan={6} className="text-center text-muted py-4">Nenhuma oportunidade cadastrada.</td></tr>
                 )}
               </tbody>
+              {oportunidades.length > 0 && (() => {
+                const totalPipeline = oportunidades
+                  .filter(o => o.status === StatusOportunidade.Aberta || o.status === StatusOportunidade.EmAndamento)
+                  .reduce((s, o) => s + o.valor, 0)
+                return (
+                  <tfoot className="table-light">
+                    <tr>
+                      <td colSpan={2} className="fw-semibold">Pipeline Ativo</td>
+                      <td className="fw-bold">
+                        R$ {totalPipeline.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                      </td>
+                      <td colSpan={3} />
+                    </tr>
+                  </tfoot>
+                )
+              })()}
             </table>
           </div>
         )}

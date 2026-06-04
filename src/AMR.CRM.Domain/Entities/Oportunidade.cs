@@ -4,32 +4,39 @@ namespace AMR.CRM.Domain.Entities;
 
 public class Oportunidade
 {
-    public Guid               Id          { get; private set; }
-    public Guid               ContatoId   { get; private set; }
-    public string             Titulo      { get; private set; } = default!;
-    public decimal            Valor       { get; private set; }
-    public StatusOportunidade Status      { get; private set; }
-    public string?            Descricao   { get; private set; }
+    public Guid               Id            { get; private set; }
+    public Guid               ContatoId     { get; private set; }
+    public Guid?              LeadId        { get; private set; }
+    public string             Titulo        { get; private set; } = default!;
+    public decimal            Valor         { get; private set; }
+    public decimal            Probabilidade { get; private set; }
+    public StatusOportunidade Status        { get; private set; }
+    public string?            Descricao     { get; private set; }
     public DateTime?          PrevisaoFechamento { get; private set; }
-    public DateTime           CriadoEm   { get; private set; }
-    public DateTime           AlteradoEm { get; private set; }
+    public DateTime           CriadoEm     { get; private set; }
+    public DateTime           AlteradoEm   { get; private set; }
 
     public Contato? Contato { get; private set; }
+    public Lead?    Lead    { get; private set; }
 
     private Oportunidade() { }
 
     public static Oportunidade Criar(Guid contatoId, string titulo, decimal valor,
-        string? descricao = null, DateTime? previsaoFechamento = null)
+        string? descricao = null, DateTime? previsaoFechamento = null,
+        Guid? leadId = null, decimal probabilidade = 0)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(titulo);
         if (valor < 0) throw new ArgumentException("Valor não pode ser negativo.", nameof(valor));
+        if (probabilidade is < 0 or > 100) throw new ArgumentException("Probabilidade deve estar entre 0 e 100.", nameof(probabilidade));
 
         return new Oportunidade
         {
             Id                 = Guid.NewGuid(),
             ContatoId          = contatoId,
+            LeadId             = leadId,
             Titulo             = titulo.Trim(),
             Valor              = valor,
+            Probabilidade      = probabilidade,
             Status             = StatusOportunidade.Aberta,
             Descricao          = descricao?.Trim(),
             PrevisaoFechamento = previsaoFechamento,

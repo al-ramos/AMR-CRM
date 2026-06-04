@@ -5,8 +5,9 @@ namespace AMR.CRM.Infrastructure.Data;
 
 public class AmrCrmDbContext(DbContextOptions<AmrCrmDbContext> options) : DbContext(options)
 {
-    public DbSet<Contato>      Contatos     => Set<Contato>();
+    public DbSet<Contato>      Contatos      => Set<Contato>();
     public DbSet<Oportunidade> Oportunidades => Set<Oportunidade>();
+    public DbSet<Lead>         Leads         => Set<Lead>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {

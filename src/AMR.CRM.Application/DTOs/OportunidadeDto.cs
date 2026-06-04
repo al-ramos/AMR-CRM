@@ -8,9 +8,12 @@ public record OportunidadeDto(
     string             ContatoNome,
     string             Titulo,
     decimal            Valor,
+    decimal            Probabilidade,
     StatusOportunidade Status,
     string             StatusNome,
     string?            Descricao,
     DateTime?          PrevisaoFechamento,
-    DateTime           CriadoEm
+    DateTime           CriadoEm,
+    Guid?              LeadId     = null,
+    string?            LeadNome   = null
 );

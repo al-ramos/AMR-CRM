@@ -9,7 +9,9 @@ public record CriarOportunidadeCommand(
     string    Titulo,
     decimal   Valor,
     string?   Descricao          = null,
-    DateTime? PrevisaoFechamento = null
+    DateTime? PrevisaoFechamento = null,
+    Guid?     LeadId             = null,
+    decimal   Probabilidade      = 0
 ) : IRequest<Result<OportunidadeDto>>;
 
 public class CriarOportunidadeCommandHandler(
@@ -24,16 +26,17 @@ public class CriarOportunidadeCommandHandler(
         if (contato is null) return Result.Falha<OportunidadeDto>("Contato não encontrado.");
 
         var oportunidade = Oportunidade.Criar(req.ContatoId, req.Titulo, req.Valor,
-            req.Descricao, req.PrevisaoFechamento);
+            req.Descricao, req.PrevisaoFechamento, req.LeadId, req.Probabilidade);
 
         await repo.AdicionarAsync(oportunidade, ct);
         await uow.SaveChangesAsync(ct);
 
         return Result.Ok(new OportunidadeDto(
             oportunidade.Id, oportunidade.ContatoId, contato.Nome,
-            oportunidade.Titulo, oportunidade.Valor,
+            oportunidade.Titulo, oportunidade.Valor, oportunidade.Probabilidade,
             oportunidade.Status, oportunidade.Status.ToString(),
-            oportunidade.Descricao, oportunidade.PrevisaoFechamento, oportunidade.CriadoEm
+            oportunidade.Descricao, oportunidade.PrevisaoFechamento, oportunidade.CriadoEm,
+            oportunidade.LeadId
         ));
     }
 }
