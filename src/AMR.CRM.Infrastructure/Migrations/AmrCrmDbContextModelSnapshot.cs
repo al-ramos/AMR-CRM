@@ -17,6 +17,42 @@ namespace AMR.CRM.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
 
+            modelBuilder.Entity("AMR.CRM.Domain.Entities.Atividade", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("AlteradoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Concluida")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataHora")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OportunidadeId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OportunidadeId");
+
+                    b.ToTable("Atividades");
+                });
+
             modelBuilder.Entity("AMR.CRM.Domain.Entities.Contato", b =>
                 {
                     b.Property<Guid>("Id")
@@ -159,6 +195,17 @@ namespace AMR.CRM.Infrastructure.Migrations
                     b.ToTable("Oportunidades");
                 });
 
+            modelBuilder.Entity("AMR.CRM.Domain.Entities.Atividade", b =>
+                {
+                    b.HasOne("AMR.CRM.Domain.Entities.Oportunidade", "Oportunidade")
+                        .WithMany("Atividades")
+                        .HasForeignKey("OportunidadeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Oportunidade");
+                });
+
             modelBuilder.Entity("AMR.CRM.Domain.Entities.Oportunidade", b =>
                 {
                     b.HasOne("AMR.CRM.Domain.Entities.Contato", "Contato")
@@ -183,6 +230,11 @@ namespace AMR.CRM.Infrastructure.Migrations
             modelBuilder.Entity("AMR.CRM.Domain.Entities.Lead", b =>
                 {
                     b.Navigation("Oportunidades");
+                });
+
+            modelBuilder.Entity("AMR.CRM.Domain.Entities.Oportunidade", b =>
+                {
+                    b.Navigation("Atividades");
                 });
 #pragma warning restore 612, 618
         }

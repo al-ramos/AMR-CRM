@@ -8,6 +8,7 @@ public class AmrCrmDbContext(DbContextOptions<AmrCrmDbContext> options) : DbCont
     public DbSet<Contato>      Contatos      => Set<Contato>();
     public DbSet<Oportunidade> Oportunidades => Set<Oportunidade>();
     public DbSet<Lead>         Leads         => Set<Lead>();
+    public DbSet<Atividade>    Atividades    => Set<Atividade>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {

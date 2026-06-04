@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { PlusCircle, Pencil, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { PlusCircle, Pencil, Trash2, Eye } from 'lucide-react'
 import {
   oportunidadeApi,
   OportunidadeDto,
@@ -34,6 +35,7 @@ const emptyForm = (): CriarOportunidadeRequest => ({
 
 export default function OportunidadesPage() {
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const [showModal, setShowModal] = useState(false)
   const [modalMode, setModalMode] = useState<ModalMode>('criar')
   const [editId, setEditId] = useState<string | null>(null)
@@ -203,6 +205,11 @@ export default function OportunidadesPage() {
                             </button>
                           </>
                         )}
+                        <button className="btn btn-outline-info btn-sm"
+                          title="Ver atividades"
+                          onClick={() => navigate(`/oportunidades/${o.id}`)}>
+                          <Eye size={13} />
+                        </button>
                         <button className="btn btn-outline-primary btn-sm"
                           onClick={() => openEditar(o)}>
                           <Pencil size={13} />

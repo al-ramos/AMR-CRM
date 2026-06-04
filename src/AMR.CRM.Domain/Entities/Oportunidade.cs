@@ -18,6 +18,7 @@ public class Oportunidade
 
     public Contato? Contato { get; private set; }
     public Lead?    Lead    { get; private set; }
+    public ICollection<Atividade> Atividades { get; private set; } = [];
 
     private Oportunidade() { }
 

@@ -4,6 +4,7 @@ using AMR.CRM.Application.Oportunidades.Commands;
 using AMR.CRM.Application.Oportunidades.Queries;
 using AMR.CRM.Domain.Enums;
 
+
 namespace AMR.CRM.API.Controllers;
 
 [ApiController]
@@ -15,6 +16,14 @@ public class OportunidadeController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(new ListarOportunidadesQuery(), ct);
         return Ok(result);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> Obter(Guid id, CancellationToken ct)
+    {
+        var result = await mediator.Send(new ObterOportunidadeQuery(id), ct);
+        if (!result.Sucesso) return NotFound(new { erro = result.Erro });
+        return Ok(result.Valor);
     }
 
     [HttpPost]

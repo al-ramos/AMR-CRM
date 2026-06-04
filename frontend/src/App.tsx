@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar'
 import DashboardPage from './pages/DashboardPage'
 import ContatosPage from './pages/ContatosPage'
 import OportunidadesPage from './pages/OportunidadesPage'
+import OportunidadeDetalhePage from './pages/OportunidadeDetalhePage'
 import LeadsPage from './pages/LeadsPage'
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/leads" element={<LeadsPage />} />
           <Route path="/contatos" element={<ContatosPage />} />
           <Route path="/oportunidades" element={<OportunidadesPage />} />
+          <Route path="/oportunidades/:id" element={<OportunidadeDetalhePage />} />
         </Routes>
       </main>
     </BrowserRouter>

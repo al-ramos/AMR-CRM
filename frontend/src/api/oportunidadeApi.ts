@@ -44,6 +44,7 @@ export const StatusOportunidade = {
 
 export const oportunidadeApi = {
   listar:    () => api.get<OportunidadeDto[]>('/oportunidade').then(r => r.data),
+  obter:     (id: string) => api.get<OportunidadeDto>(`/oportunidade/${id}`).then(r => r.data),
   criar:     (req: CriarOportunidadeRequest) =>
     api.post<OportunidadeDto>('/oportunidade', req).then(r => r.data),
   atualizar: (id: string, req: AtualizarOportunidadeRequest) =>
