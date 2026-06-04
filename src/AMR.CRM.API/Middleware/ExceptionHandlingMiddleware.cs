@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using FluentValidation;
 
 namespace AMR.CRM.API.Middleware;
 
@@ -10,6 +11,14 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
         try
         {
             await next(ctx);
+        }
+        catch (ValidationException ex)
+        {
+            logger.LogWarning("Validação falhou: {Errors}", ex.Message);
+            var erros = ex.Errors.Select(e => e.ErrorMessage).ToList();
+            ctx.Response.StatusCode  = (int)HttpStatusCode.BadRequest;
+            ctx.Response.ContentType = "application/json";
+            await ctx.Response.WriteAsync(JsonSerializer.Serialize(new { erros }));
         }
         catch (ArgumentException ex)
         {
