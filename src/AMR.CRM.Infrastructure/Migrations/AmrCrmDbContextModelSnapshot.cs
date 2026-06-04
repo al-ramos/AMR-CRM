@@ -119,7 +119,7 @@ namespace AMR.CRM.Infrastructure.Migrations
                     b.Property<DateTime>("AlteradoEm")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("ContatoId")
+                    b.Property<Guid?>("ContatoId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CriadoEm")
@@ -164,8 +164,7 @@ namespace AMR.CRM.Infrastructure.Migrations
                     b.HasOne("AMR.CRM.Domain.Entities.Contato", "Contato")
                         .WithMany("Oportunidades")
                         .HasForeignKey("ContatoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("AMR.CRM.Domain.Entities.Lead", "Lead")
                         .WithMany("Oportunidades")

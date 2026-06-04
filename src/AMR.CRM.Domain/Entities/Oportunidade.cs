@@ -5,7 +5,7 @@ namespace AMR.CRM.Domain.Entities;
 public class Oportunidade
 {
     public Guid               Id            { get; private set; }
-    public Guid               ContatoId     { get; private set; }
+    public Guid?              ContatoId     { get; private set; }
     public Guid?              LeadId        { get; private set; }
     public string             Titulo        { get; private set; } = default!;
     public decimal            Valor         { get; private set; }
@@ -21,10 +21,12 @@ public class Oportunidade
 
     private Oportunidade() { }
 
-    public static Oportunidade Criar(Guid contatoId, string titulo, decimal valor,
+    public static Oportunidade Criar(Guid? contatoId, string titulo, decimal valor,
         string? descricao = null, DateTime? previsaoFechamento = null,
         Guid? leadId = null, decimal probabilidade = 0)
     {
+        if (contatoId is null && leadId is null)
+            throw new ArgumentException("É obrigatório informar o Contato ou Lead.");
         ArgumentException.ThrowIfNullOrWhiteSpace(titulo);
         if (valor < 0) throw new ArgumentException("Valor não pode ser negativo.", nameof(valor));
         if (probabilidade is < 0 or > 100) throw new ArgumentException("Probabilidade deve estar entre 0 e 100.", nameof(probabilidade));
@@ -45,14 +47,16 @@ public class Oportunidade
         };
     }
 
-    public void Atualizar(string titulo, decimal valor, string? descricao = null,
-        DateTime? previsaoFechamento = null)
+    public void Atualizar(string titulo, decimal valor, decimal probabilidade = 0,
+        string? descricao = null, DateTime? previsaoFechamento = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(titulo);
         if (valor < 0) throw new ArgumentException("Valor não pode ser negativo.", nameof(valor));
+        if (probabilidade is < 0 or > 100) throw new ArgumentException("Probabilidade deve estar entre 0 e 100.", nameof(probabilidade));
 
         Titulo             = titulo.Trim();
         Valor              = valor;
+        Probabilidade      = probabilidade;
         Descricao          = descricao?.Trim();
         PrevisaoFechamento = previsaoFechamento;
         AlteradoEm         = DateTime.UtcNow;

@@ -18,6 +18,7 @@ public class ContatoMapping : IEntityTypeConfiguration<Contato>
         b.HasMany(c => c.Oportunidades)
          .WithOne(o => o.Contato)
          .HasForeignKey(o => o.ContatoId)
+         .IsRequired(false)
          .OnDelete(DeleteBehavior.Restrict);
     }
 }

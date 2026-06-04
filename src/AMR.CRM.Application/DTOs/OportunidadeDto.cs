@@ -4,8 +4,8 @@ namespace AMR.CRM.Application.DTOs;
 
 public record OportunidadeDto(
     Guid               Id,
-    Guid               ContatoId,
-    string             ContatoNome,
+    Guid?              ContatoId,
+    string?            ContatoNome,
     string             Titulo,
     decimal            Valor,
     decimal            Probabilidade,

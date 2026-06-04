@@ -7,8 +7,9 @@ public class CriarOportunidadeCommandValidator : AbstractValidator<CriarOportuni
 {
     public CriarOportunidadeCommandValidator()
     {
-        RuleFor(x => x.ContatoId)
-            .NotEmpty().WithMessage("ContatoId é obrigatório.");
+        RuleFor(x => x)
+            .Must(x => x.ContatoId.HasValue || x.LeadId.HasValue)
+            .WithMessage("É obrigatório informar o Contato ou o Lead.");
 
         RuleFor(x => x.Titulo)
             .NotEmpty().WithMessage("Título é obrigatório.")
@@ -16,6 +17,9 @@ public class CriarOportunidadeCommandValidator : AbstractValidator<CriarOportuni
 
         RuleFor(x => x.Valor)
             .GreaterThanOrEqualTo(0).WithMessage("Valor não pode ser negativo.");
+
+        RuleFor(x => x.Probabilidade)
+            .InclusiveBetween(0, 100).WithMessage("Probabilidade deve estar entre 0 e 100.");
 
         RuleFor(x => x.Descricao)
             .MaximumLength(2000).WithMessage("Descrição deve ter no máximo 2000 caracteres.")

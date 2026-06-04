@@ -22,27 +22,77 @@ public class OportunidadeController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(
             new CriarOportunidadeCommand(req.ContatoId, req.Titulo, req.Valor,
-                req.Descricao, req.PrevisaoFechamento), ct);
+                req.Descricao, req.PrevisaoFechamento, req.LeadId, req.Probabilidade), ct);
         if (!result.Sucesso) return BadRequest(new { erro = result.Erro });
         return Created(string.Empty, result.Valor);
     }
 
-    [HttpPatch("{id:guid}/status")]
-    public async Task<IActionResult> AvancarStatus(Guid id,
-        [FromBody] AvancarStatusRequest req, CancellationToken ct)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Atualizar(Guid id,
+        [FromBody] AtualizarOportunidadeRequest req, CancellationToken ct)
     {
-        var result = await mediator.Send(new AvancarOportunidadeCommand(id, req.NovoStatus), ct);
+        var result = await mediator.Send(
+            new AtualizarOportunidadeCommand(id, req.Titulo, req.Valor,
+                req.Probabilidade, req.Descricao, req.PrevisaoFechamento), ct);
+        if (!result.Sucesso) return BadRequest(new { erro = result.Erro });
+        return Ok(result.Valor);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Excluir(Guid id, CancellationToken ct)
+    {
+        var result = await mediator.Send(new ExcluirOportunidadeCommand(id), ct);
+        if (!result.Sucesso) return BadRequest(new { erro = result.Erro });
+        return NoContent();
+    }
+
+    [HttpPatch("{id:guid}/iniciar")]
+    public async Task<IActionResult> Iniciar(Guid id, CancellationToken ct)
+    {
+        var result = await mediator.Send(new AvancarOportunidadeCommand(id, StatusOportunidade.EmAndamento), ct);
+        if (!result.Sucesso) return BadRequest(new { erro = result.Erro });
+        return NoContent();
+    }
+
+    [HttpPatch("{id:guid}/ganhar")]
+    public async Task<IActionResult> Ganhar(Guid id, CancellationToken ct)
+    {
+        var result = await mediator.Send(new AvancarOportunidadeCommand(id, StatusOportunidade.Ganha), ct);
+        if (!result.Sucesso) return BadRequest(new { erro = result.Erro });
+        return NoContent();
+    }
+
+    [HttpPatch("{id:guid}/perder")]
+    public async Task<IActionResult> Perder(Guid id, CancellationToken ct)
+    {
+        var result = await mediator.Send(new AvancarOportunidadeCommand(id, StatusOportunidade.Perdida), ct);
+        if (!result.Sucesso) return BadRequest(new { erro = result.Erro });
+        return NoContent();
+    }
+
+    [HttpPatch("{id:guid}/cancelar")]
+    public async Task<IActionResult> Cancelar(Guid id, CancellationToken ct)
+    {
+        var result = await mediator.Send(new AvancarOportunidadeCommand(id, StatusOportunidade.Cancelada), ct);
         if (!result.Sucesso) return BadRequest(new { erro = result.Erro });
         return NoContent();
     }
 }
 
 public record CriarOportunidadeRequest(
-    Guid      ContatoId,
     string    Titulo,
     decimal   Valor,
+    Guid?     ContatoId          = null,
+    Guid?     LeadId             = null,
+    decimal   Probabilidade      = 0,
     string?   Descricao          = null,
     DateTime? PrevisaoFechamento = null
 );
 
-public record AvancarStatusRequest(StatusOportunidade NovoStatus);
+public record AtualizarOportunidadeRequest(
+    string    Titulo,
+    decimal   Valor,
+    decimal   Probabilidade      = 0,
+    string?   Descricao          = null,
+    DateTime? PrevisaoFechamento = null
+);
