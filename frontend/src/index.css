@@ -1,0 +1,59 @@
+:root {
+  --amr-primary: #0d6efd;
+  --amr-sidebar-bg: #1e2a38;
+  --amr-sidebar-text: #adb5bd;
+  --amr-sidebar-active: #ffffff;
+}
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background-color: var(--amr-sidebar-bg);
+  color: var(--amr-sidebar-text);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar .nav-link {
+  color: var(--amr-sidebar-text);
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  margin: 2px 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.15s;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--amr-sidebar-active);
+}
+
+.main-content {
+  margin-left: 240px;
+  padding: 1.5rem;
+  min-height: 100vh;
+}
+
+.card-kpi {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.badge-aberta    { background-color: #0d6efd; }
+.badge-andamento { background-color: #fd7e14; }
+.badge-ganha     { background-color: #198754; }
+.badge-perdida   { background-color: #dc3545; }
+.badge-cancelada { background-color: #6c757d; }
