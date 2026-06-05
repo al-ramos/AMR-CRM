@@ -4,6 +4,8 @@ import DashboardPage from './pages/DashboardPage'
 import LeadsPage from './pages/LeadsPage'
 import ContatosPage from './pages/ContatosPage'
 import OportunidadesPage from './pages/OportunidadesPage'
+import RelatoriosPage from './pages/RelatoriosPage'
+import AtividadesPage from './pages/AtividadesPage'
 
 export default function App() {
   return (
@@ -16,6 +18,8 @@ export default function App() {
           <Route path="/leads"         element={<LeadsPage />} />
           <Route path="/contatos"      element={<ContatosPage />} />
           <Route path="/oportunidades" element={<OportunidadesPage />} />
+          <Route path="/atividades"    element={<AtividadesPage />} />
+          <Route path="/relatorios"    element={<RelatoriosPage />} />
         </Routes>
       </main>
     </BrowserRouter>

@@ -141,8 +141,8 @@ export default function DashboardPage() {
                   <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={90} />
                   <Tooltip
-                    formatter={(v: number) => [v, 'Qtd.']}
-                    labelFormatter={(l: string) => `Etapa: ${l}`}
+                    formatter={(v) => [v, 'Qtd.']}
+                    labelFormatter={(l) => `Etapa: ${l}`}
                   />
                   <Bar dataKey="count" name="Oportunidades" radius={[0, 4, 4, 0]} maxBarSize={28}>
                     {funilData.map((entry, i) => (
