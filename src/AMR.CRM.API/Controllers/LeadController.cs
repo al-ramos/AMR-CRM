@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using AMR.CRM.Application.Leads.Commands;
 using AMR.CRM.Application.Leads.Queries;
 using AMR.CRM.Domain.Enums;
+using AMR.CRM.Application.Interfaces;
 
 namespace AMR.CRM.API.Controllers;
 
@@ -69,6 +70,17 @@ public class LeadController(IMediator mediator) : ControllerBase
         if (!result.Sucesso) return BadRequest(new { erro = result.Erro });
         return NoContent();
     }
+
+    /// <summary>Importa clientes selecionados do AMR-Core como novos Leads.</summary>
+    [HttpPost("importar-de-core")]
+    public async Task<IActionResult> ImportarDeCore(
+        [FromBody] ImportarDeCoreRequest req, CancellationToken ct)
+    {
+        var result = await mediator.Send(new ImportarLeadsFromCoreCommand(req.ClienteIds), ct);
+        if (!result.Sucesso)
+            return StatusCode(503, new { erro = result.Erro });
+        return Ok(new { importados = result.Valor!.Importados, ignorados = result.Valor.Ignorados });
+    }
 }
 
 public record CriarLeadRequest(
@@ -92,3 +104,5 @@ public record AtualizarLeadRequest(
 );
 
 public record AvancarStatusRequest(StatusLead NovoStatus);
+
+public record ImportarDeCoreRequest(List<int> ClienteIds);

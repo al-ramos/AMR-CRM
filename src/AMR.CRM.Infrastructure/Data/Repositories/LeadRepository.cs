@@ -22,6 +22,12 @@ public class LeadRepository(AmrCrmDbContext ctx) : ILeadRepository
                .OrderByDescending(l => l.CriadoEm)
                .ToListAsync(ct);
 
+    public Task<List<int>> ListarOrigemCoreClienteIdsAsync(CancellationToken ct = default)
+        => ctx.Leads.AsNoTracking()
+               .Where(l => l.OrigemCoreClienteId.HasValue)
+               .Select(l => l.OrigemCoreClienteId!.Value)
+               .ToListAsync(ct);
+
     public async Task AdicionarAsync(Lead lead, CancellationToken ct = default)
         => await ctx.Leads.AddAsync(lead, ct);
 

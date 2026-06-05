@@ -15,6 +15,7 @@ public static class AmrCrmSeed
         await SeedContatosAsync(ctx);
         await SeedLeadsAsync(ctx);
         await SeedOportunidadesAsync(ctx);
+        await SeedAtividadesAsync(ctx);
     }
 
     // ── Contatos ──────────────────────────────────────────────────────────────
@@ -130,6 +131,56 @@ public static class AmrCrmSeed
         op6.IniciarAndamento();
 
         ctx.Oportunidades.AddRange(op1, op2, op3, op4, op5, op6);
+        await ctx.SaveChangesAsync();
+    }
+
+    // ── Atividades ────────────────────────────────────────────────────────────
+    private static async Task SeedAtividadesAsync(AmrCrmDbContext ctx)
+    {
+        if (await ctx.Atividades.AnyAsync()) return;
+
+        var leads         = await ctx.Leads.ToListAsync();
+        var oportunidades = await ctx.Oportunidades.ToListAsync();
+
+        var a1 = Atividade.Criar(
+            "Ligar para Marcos sobre proposta", TipoAtividade.Ligacao,
+            DateTime.UtcNow.AddDays(3),
+            leadId: leads[0].Id,
+            observacao: "Confirmar interesse após envio da proposta inicial.");
+
+        var a2 = Atividade.Criar(
+            "Enviar e-mail de follow-up — AgroMax", TipoAtividade.Email,
+            DateTime.UtcNow.AddDays(-5),
+            leadId: leads[1].Id,
+            observacao: "Apresentar cases de sucesso do setor agrícola.");
+        a2.Atualizar(a2.Titulo, a2.Tipo, a2.DataPrevista, StatusAtividade.Concluida, a2.Observacao);
+
+        var a3 = Atividade.Criar(
+            "Reunião de alinhamento técnico — Contrato anual", TipoAtividade.Reuniao,
+            DateTime.UtcNow.AddDays(-2),
+            oportunidadeId: oportunidades[0].Id,
+            observacao: "Definir escopo técnico com equipe de TI do cliente.");
+
+        var a4 = Atividade.Criar(
+            "Preparar proposta comercial — ConstruFlex", TipoAtividade.Tarefa,
+            DateTime.UtcNow.AddDays(7),
+            leadId: leads[2].Id,
+            observacao: "Incluir cronograma detalhado e condições de pagamento.");
+        a4.Atualizar(a4.Titulo, a4.Tipo, a4.DataPrevista, StatusAtividade.Cancelada, a4.Observacao);
+
+        var a5 = Atividade.Criar(
+            "Visita técnica — Automação linha de produção", TipoAtividade.Visita,
+            DateTime.UtcNow.AddDays(-1),
+            oportunidadeId: oportunidades[1].Id,
+            observacao: "Levantamento de requisitos in loco na planta industrial.");
+
+        var a6 = Atividade.Criar(
+            "Agendar demo do módulo MES — SoftPrime", TipoAtividade.Ligacao,
+            DateTime.UtcNow.AddDays(14),
+            leadId: leads[3].Id,
+            observacao: "Demonstração para o time técnico e financeiro.");
+
+        ctx.Atividades.AddRange(a1, a2, a3, a4, a5, a6);
         await ctx.SaveChangesAsync();
     }
 }

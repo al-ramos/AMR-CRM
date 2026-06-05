@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { PlusCircle, Pencil, Trash2 } from 'lucide-react'
+import { PlusCircle, Pencil, Trash2, Download } from 'lucide-react'
 import {
   leadApi, LeadDto, CriarLeadRequest,
   StatusLead, ORIGENS,
 } from '../api/leadApi'
+import { integracaoApi, ClienteCoreDto } from '../api/integracaoApi'
 
 // ── badge ────────────────────────────────────────────────────────────────────
 const STATUS_LABEL: Record<number, string> = {
@@ -32,6 +33,8 @@ const PROXIMOS: Record<number, number[]> = {
 
 const EMPTY: CriarLeadRequest = { nome: '', email: '', origem: 1, valorEstimado: 0 }
 
+type Toast = { type: 'success' | 'danger'; msg: string }
+
 export default function LeadsPage() {
   const qc = useQueryClient()
   const [filtroStatus, setFiltroStatus] = useState<number | undefined>(undefined)
@@ -39,9 +42,26 @@ export default function LeadsPage() {
   const [editing, setEditing]           = useState<LeadDto | null>(null)
   const [form, setForm]                 = useState<CriarLeadRequest>(EMPTY)
 
+  // import from AMR-Core
+  const [showImport, setShowImport]     = useState(false)
+  const [selectedIds, setSelectedIds]   = useState<number[]>([])
+  const [toast, setToast]               = useState<Toast | null>(null)
+
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ['leads', filtroStatus],
     queryFn:  () => leadApi.listar(filtroStatus),
+  })
+
+  const {
+    data: coreClientes = [],
+    isLoading: loadingCore,
+    isError: coreOffline,
+    refetch: fetchCoreClientes,
+  } = useQuery({
+    queryKey: ['core-clientes'],
+    queryFn:  integracaoApi.getClientesCore,
+    enabled:  false,
+    retry:    false,
   })
 
   const criarMut = useMutation({
@@ -60,6 +80,15 @@ export default function LeadsPage() {
     mutationFn: leadApi.excluir,
     onSuccess: () => qc.invalidateQueries({ queryKey: ['leads'] }),
   })
+  const importarMut = useMutation({
+    mutationFn: integracaoApi.importarDeCore,
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['leads'] })
+      closeImport()
+      showToast('success', `${data.importados} importado(s), ${data.ignorados} ignorado(s).`)
+    },
+    onError: () => showToast('danger', 'AMR-Core está offline. Não foi possível importar.'),
+  })
 
   const openCreate = () => { setEditing(null); setForm(EMPTY); setShowModal(true) }
   const openEdit   = (l: LeadDto) => {
@@ -72,6 +101,26 @@ export default function LeadsPage() {
     setShowModal(true)
   }
   const closeModal = () => { setShowModal(false); setEditing(null); setForm(EMPTY) }
+
+  const openImport = () => {
+    setSelectedIds([])
+    setShowImport(true)
+    fetchCoreClientes()
+  }
+  const closeImport = () => { setShowImport(false); setSelectedIds([]) }
+
+  const toggleId = (id: number) =>
+    setSelectedIds(ids => ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id])
+
+  const toggleAll = (clients: ClienteCoreDto[]) => {
+    if (selectedIds.length === clients.length) setSelectedIds([])
+    else setSelectedIds(clients.map(c => c.id))
+  }
+
+  const showToast = (type: Toast['type'], msg: string) => {
+    setToast({ type, msg })
+    setTimeout(() => setToast(null), 5000)
+  }
 
   const handleSave = () => {
     if (editing) atualizarMut.mutate({ id: editing.id, req: form })
@@ -87,13 +136,27 @@ export default function LeadsPage() {
 
   return (
     <div>
+      {/* ── toast ── */}
+      {toast && (
+        <div className={`alert alert-${toast.type} alert-dismissible d-flex align-items-center mb-3`} role="alert">
+          <span>{toast.msg}</span>
+          <button type="button" className="btn-close ms-auto" onClick={() => setToast(null)} />
+        </div>
+      )}
+
       {/* ── cabeçalho ── */}
       <div className="d-flex align-items-center justify-content-between mb-3">
         <h4 className="fw-bold mb-0">Leads</h4>
-        <button className="btn btn-primary btn-sm d-flex align-items-center gap-2"
-          onClick={openCreate}>
-          <PlusCircle size={15} /> Novo Lead
-        </button>
+        <div className="d-flex gap-2">
+          <button className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2"
+            onClick={openImport}>
+            <Download size={15} /> Importar do AMR-Core
+          </button>
+          <button className="btn btn-primary btn-sm d-flex align-items-center gap-2"
+            onClick={openCreate}>
+            <PlusCircle size={15} /> Novo Lead
+          </button>
+        </div>
       </div>
 
       {/* ── filtro de status ── */}
@@ -131,7 +194,15 @@ export default function LeadsPage() {
                 {leads.map(l => (
                   <tr key={l.id} style={{ opacity: l.status >= 4 ? 0.65 : 1 }}>
                     <td>
-                      <div className="fw-medium">{l.nome}</div>
+                      <div className="fw-medium d-flex align-items-center gap-1">
+                        {l.nome}
+                        {l.origemCoreClienteId != null && (
+                          <span className="badge text-bg-primary"
+                            style={{ fontSize: '0.6rem', padding: '2px 5px' }}>
+                            AMR-Core
+                          </span>
+                        )}
+                      </div>
                       <small className="text-muted">{l.email}</small>
                     </td>
                     <td className="small">{l.empresa ?? '—'}</td>
@@ -255,6 +326,80 @@ export default function LeadsPage() {
                   disabled={!form.nome || !form.email || isWorking}
                   onClick={handleSave}>
                   {isWorking ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── modal importar do AMR-Core ── */}
+      {showImport && (
+        <div className="modal show d-block" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title d-flex align-items-center gap-2">
+                  <Download size={18} /> Importar clientes do AMR-Core
+                </h5>
+                <button className="btn-close" onClick={closeImport} />
+              </div>
+              <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                {loadingCore && (
+                  <div className="text-center text-muted py-4">Conectando ao AMR-Core...</div>
+                )}
+                {coreOffline && !loadingCore && (
+                  <div className="alert alert-danger mb-0">
+                    AMR-Core está offline ou inacessível. Verifique se o serviço está rodando em <code>localhost:5001</code>.
+                  </div>
+                )}
+                {!loadingCore && !coreOffline && coreClientes.length === 0 && (
+                  <div className="text-center text-muted py-4">Nenhum cliente encontrado no AMR-Core.</div>
+                )}
+                {!loadingCore && !coreOffline && coreClientes.length > 0 && (
+                  <table className="table table-hover align-middle mb-0">
+                    <thead className="table-light">
+                      <tr>
+                        <th style={{ width: 40 }}>
+                          <input type="checkbox"
+                            checked={selectedIds.length === coreClientes.length}
+                            onChange={() => toggleAll(coreClientes)} />
+                        </th>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Telefone</th>
+                        <th>Doc.</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {coreClientes.map(c => (
+                        <tr key={c.id} style={{ cursor: 'pointer' }}
+                          onClick={() => toggleId(c.id)}>
+                          <td onClick={e => e.stopPropagation()}>
+                            <input type="checkbox"
+                              checked={selectedIds.includes(c.id)}
+                              onChange={() => toggleId(c.id)} />
+                          </td>
+                          <td className="fw-medium">{c.nome}</td>
+                          <td className="small text-muted">{c.email}</td>
+                          <td className="small">{c.telefone ?? '—'}</td>
+                          <td className="small">{c.cnpj ?? c.cpf ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+              <div className="modal-footer">
+                <span className="text-muted small me-auto">
+                  {selectedIds.length} selecionado(s)
+                </span>
+                <button className="btn btn-secondary" onClick={closeImport}>Cancelar</button>
+                <button className="btn btn-primary d-flex align-items-center gap-2"
+                  disabled={selectedIds.length === 0 || importarMut.isPending}
+                  onClick={() => importarMut.mutate(selectedIds)}>
+                  <Download size={15} />
+                  {importarMut.isPending ? 'Importando...' : `Importar ${selectedIds.length > 0 ? `(${selectedIds.length})` : ''}`}
                 </button>
               </div>
             </div>

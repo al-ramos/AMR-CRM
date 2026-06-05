@@ -13,8 +13,8 @@ COPY --from=build /app/publish .
 # SQLite data dir
 RUN mkdir -p /data
 ENV ConnectionStrings__AmrCrm="Data Source=/data/amr-crm.db"
-ENV ASPNETCORE_URLS="http://+:5187"
+ENV ASPNETCORE_URLS="http://+:8080"
 ENV ASPNETCORE_ENVIRONMENT="Production"
 
-EXPOSE 5187
+EXPOSE 8080
 ENTRYPOINT ["dotnet", "AMR.CRM.API.dll"]

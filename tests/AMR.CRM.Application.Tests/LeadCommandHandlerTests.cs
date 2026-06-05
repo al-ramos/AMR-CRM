@@ -1,5 +1,6 @@
 using AMR.CRM.Application.Interfaces;
 using AMR.CRM.Application.Leads.Commands;
+using AMR.CRM.Application.Leads.Queries;
 using AMR.CRM.Domain.Entities;
 using AMR.CRM.Domain.Enums;
 using AMR.CRM.Domain.Interfaces;
@@ -114,5 +115,23 @@ public class LeadCommandHandlerTests
         var result  = await handler.Handle(cmd, CancellationToken.None);
 
         Assert.False(result.Sucesso);
+    }
+
+    // ── ListarLeads ──────────────────────────────────────────────────────────
+    [Fact]
+    public async Task ListarLeads_DeveRetornarLista()
+    {
+        var leads = new List<Lead>
+        {
+            Lead.Criar("Lead A", "a@t.com", OrigemLead.Website),
+            Lead.Criar("Lead B", "b@t.com", OrigemLead.LinkedIn),
+        };
+        _repo.ListarAsync(Arg.Any<CancellationToken>()).Returns(leads);
+
+        var handler = new ListarLeadsQueryHandler(_repo);
+        var result  = await handler.Handle(new ListarLeadsQuery(), CancellationToken.None);
+
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, d => d.Nome == "Lead A");
     }
 }

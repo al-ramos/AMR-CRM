@@ -34,6 +34,7 @@ public class CriarLeadCommandHandler(ILeadRepository repo, IUnitOfWork uow)
         l.Status, l.Status.ToString(),
         l.Origem, l.Origem.ToString(),
         l.ValorEstimado, l.Notas,
-        l.CriadoEm, l.AlteradoEm
+        l.CriadoEm, l.AlteradoEm,
+        l.OrigemCoreClienteId
     );
 }

@@ -1,46 +1,66 @@
-name: Deploy to AWS
+name: Deploy AWS
 
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 env:
-  AWS_REGION: sa-east-1
-  ECR_REPOSITORY_API: amr-crm-api
-  ECS_CLUSTER: amr-system
-  ECS_SERVICE_API: amr-crm-api
+  AWS_REGION:      sa-east-1
+  ECR_API_URL:     474874558993.dkr.ecr.sa-east-1.amazonaws.com/amr-crm/api
+  ECR_WEB_URL:     474874558993.dkr.ecr.sa-east-1.amazonaws.com/amr-crm/web
+  ECS_CLUSTER:     amr-system
+  ECS_API_SERVICE: amr-crm-api
+  ECS_WEB_SERVICE: amr-crm-web
+  ALB_URL:         http://amr-system-1908797477.sa-east-1.elb.amazonaws.com:8083
 
 jobs:
-  deploy-api:
+  deploy:
+    name: Build, Push & Deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configurar credenciais AWS
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region:            ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
+      - name: Login no ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, push API image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
+      - name: Build & Push API
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY_API:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY_API:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY_API:latest
+          TAG=$(echo $GITHUB_SHA | cut -c1-7)
+          docker build -t $ECR_API_URL:$TAG -t $ECR_API_URL:latest .
+          docker push $ECR_API_URL:$TAG
+          docker push $ECR_API_URL:latest
 
-      - name: Force ECS redeploy
+      - name: Build & Push Web
         run: |
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_SERVICE_API \
-            --force-new-deployment \
-            --region $AWS_REGION
+          TAG=$(echo $GITHUB_SHA | cut -c1-7)
+          docker build -t $ECR_WEB_URL:$TAG -t $ECR_WEB_URL:latest ./frontend
+          docker push $ECR_WEB_URL:$TAG
+          docker push $ECR_WEB_URL:latest
+
+      - name: Force new deployment
+        run: |
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_API_SERVICE --force-new-deployment --output text
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_WEB_SERVICE --force-new-deployment --output text
+
+      - name: Aguardar estabilização
+        run: |
+          aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_API_SERVICE
+          aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_WEB_SERVICE
+
+      - name: Health check
+        run: |
+          for i in $(seq 1 18); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$ALB_URL" || echo "000")
+            echo "Tentativa $i/18: HTTP $STATUS"
+            if [[ "$STATUS" == "200" ]]; then echo "✅ OK!"; exit 0; fi
+            sleep 10
+          done
+          echo "❌ Health check falhou"; exit 1

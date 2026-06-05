@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Users, TrendingUp, LayoutDashboard, Target } from 'lucide-react'
+import { Users, TrendingUp, LayoutDashboard, Target, BarChart2, Bell } from 'lucide-react'
 
 export default function Sidebar() {
   return (
@@ -34,6 +34,18 @@ export default function Sidebar() {
           <NavLink to="/oportunidades"
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <TrendingUp size={16} /> Oportunidades
+          </NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink to="/atividades"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <Bell size={16} /> Atividades
+          </NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink to="/relatorios"
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <BarChart2 size={16} /> Relatórios
           </NavLink>
         </li>
       </ul>

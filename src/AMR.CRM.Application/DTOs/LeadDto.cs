@@ -15,5 +15,6 @@ public record LeadDto(
     decimal       ValorEstimado,
     string?       Notas,
     DateTime      CriadoEm,
-    DateTime      AlteradoEm
+    DateTime      AlteradoEm,
+    int?          OrigemCoreClienteId
 );

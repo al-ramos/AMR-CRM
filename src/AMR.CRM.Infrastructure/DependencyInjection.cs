@@ -5,6 +5,7 @@ using AMR.CRM.Application.Interfaces;
 using AMR.CRM.Domain.Interfaces;
 using AMR.CRM.Infrastructure.Data;
 using AMR.CRM.Infrastructure.Data.Repositories;
+using AMR.CRM.Infrastructure.Integrations;
 
 namespace AMR.CRM.Infrastructure;
 
@@ -23,6 +24,17 @@ public static class DependencyInjection
         services.AddScoped<IContatoRepository, ContatoRepository>();
         services.AddScoped<ILeadRepository, LeadRepository>();
         services.AddScoped<IOportunidadeRepository, OportunidadeRepository>();
+        services.AddScoped<IAtividadeRepository, AtividadeRepository>();
+
+        var coreBaseUrl = configuration["IntegracaoCore:BaseUrl"] ?? "http://localhost:5001";
+        if (!int.TryParse(configuration["IntegracaoCore:Timeout"], out var coreTimeout))
+            coreTimeout = 10;
+
+        services.AddHttpClient<ICoreApiClient, CoreApiClient>(client =>
+        {
+            client.BaseAddress = new Uri(coreBaseUrl);
+            client.Timeout     = TimeSpan.FromSeconds(coreTimeout);
+        });
 
         return services;
     }

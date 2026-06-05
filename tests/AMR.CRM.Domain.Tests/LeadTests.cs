@@ -84,6 +84,15 @@ public class LeadTests
             Lead.Criar("Teste", "t@t.com", OrigemLead.Manual, valorEstimado: -1m));
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Criar_EmailVazio_DeveLancarExcecao(string email)
+    {
+        Assert.Throws<ArgumentException>(() =>
+            Lead.Criar("Nome Válido", email, OrigemLead.Manual));
+    }
+
     [Fact]
     public void Atualizar_DeveAlterarCampos()
     {

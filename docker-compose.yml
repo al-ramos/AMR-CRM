@@ -1,0 +1,24 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5187:8080"
+    volumes:
+      - crm_data:/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__AmrCrm=Data Source=/data/amr-crm.db
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5176:80"
+    depends_on:
+      - api
+
+volumes:
+  crm_data:

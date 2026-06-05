@@ -14,6 +14,7 @@ export interface LeadDto {
   notas?: string
   criadoEm: string
   alteradoEm: string
+  origemCoreClienteId?: number
 }
 
 export interface CriarLeadRequest {

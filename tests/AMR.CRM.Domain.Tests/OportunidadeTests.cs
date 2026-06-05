@@ -63,4 +63,13 @@ public class OportunidadeTests
         Assert.Throws<ArgumentException>(() =>
             Oportunidade.Criar("Oportunidade", -100m, contatoId: ContatoId));
     }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(101)]
+    public void Criar_ProbabilidadeForaDeLimite_DeveLancarExcecao(int probabilidade)
+    {
+        Assert.Throws<ArgumentException>(() =>
+            Oportunidade.Criar("Oportunidade", 1000m, probabilidade, contatoId: ContatoId));
+    }
 }

@@ -16,6 +16,8 @@ public class Lead
     public DateTime    CriadoEm       { get; private set; }
     public DateTime    AlteradoEm     { get; private set; }
 
+    public int?  OrigemCoreClienteId { get; private set; }
+
     public IReadOnlyCollection<Oportunidade> Oportunidades => _oportunidades.AsReadOnly();
     private readonly List<Oportunidade> _oportunidades = [];
 
@@ -23,7 +25,8 @@ public class Lead
 
     public static Lead Criar(string nome, string email, OrigemLead origem,
         string? telefone = null, string? empresa = null,
-        decimal valorEstimado = 0m, string? notas = null)
+        decimal valorEstimado = 0m, string? notas = null,
+        int? origemCoreClienteId = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(nome);
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
@@ -31,17 +34,18 @@ public class Lead
 
         return new Lead
         {
-            Id            = Guid.NewGuid(),
-            Nome          = nome.Trim(),
-            Email         = email.Trim().ToLowerInvariant(),
-            Telefone      = telefone?.Trim(),
-            Empresa       = empresa?.Trim(),
-            Status        = StatusLead.Novo,
-            Origem        = origem,
-            ValorEstimado = valorEstimado,
-            Notas         = notas?.Trim(),
-            CriadoEm      = DateTime.UtcNow,
-            AlteradoEm    = DateTime.UtcNow
+            Id                  = Guid.NewGuid(),
+            Nome                = nome.Trim(),
+            Email               = email.Trim().ToLowerInvariant(),
+            Telefone            = telefone?.Trim(),
+            Empresa             = empresa?.Trim(),
+            Status              = StatusLead.Novo,
+            Origem              = origem,
+            ValorEstimado       = valorEstimado,
+            Notas               = notas?.Trim(),
+            CriadoEm            = DateTime.UtcNow,
+            AlteradoEm          = DateTime.UtcNow,
+            OrigemCoreClienteId = origemCoreClienteId,
         };
     }
 

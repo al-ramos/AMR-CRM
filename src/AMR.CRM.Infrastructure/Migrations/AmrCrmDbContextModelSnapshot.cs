@@ -17,6 +17,51 @@ namespace AMR.CRM.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
 
+            modelBuilder.Entity("AMR.CRM.Domain.Entities.Atividade", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("AlteradoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DataPrevista")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("LeadId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Observacao")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("OportunidadeId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeadId");
+
+                    b.HasIndex("OportunidadeId");
+
+                    b.ToTable("Atividades");
+                });
+
             modelBuilder.Entity("AMR.CRM.Domain.Entities.Contato", b =>
                 {
                     b.Property<Guid>("Id")
@@ -95,6 +140,9 @@ namespace AMR.CRM.Infrastructure.Migrations
                     b.Property<int>("Origem")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("OrigemCoreClienteId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
@@ -161,6 +209,23 @@ namespace AMR.CRM.Infrastructure.Migrations
                     b.HasIndex("LeadId");
 
                     b.ToTable("Oportunidades");
+                });
+
+            modelBuilder.Entity("AMR.CRM.Domain.Entities.Atividade", b =>
+                {
+                    b.HasOne("AMR.CRM.Domain.Entities.Lead", "Lead")
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AMR.CRM.Domain.Entities.Oportunidade", "Oportunidade")
+                        .WithMany()
+                        .HasForeignKey("OportunidadeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Lead");
+
+                    b.Navigation("Oportunidade");
                 });
 
             modelBuilder.Entity("AMR.CRM.Domain.Entities.Oportunidade", b =>
