@@ -10,6 +10,7 @@ public class Oportunidade
     public string             Titulo             { get; private set; } = default!;
     public decimal            Valor              { get; private set; }
     public int                Probabilidade      { get; private set; }   // 0–100 %
+    public EtapaOportunidade  Etapa              { get; private set; }
     public StatusOportunidade Status             { get; private set; }
     public string?            Descricao          { get; private set; }
     public DateTime?          PrevisaoFechamento { get; private set; }
@@ -23,7 +24,8 @@ public class Oportunidade
 
     public static Oportunidade Criar(string titulo, decimal valor, int probabilidade = 50,
         Guid? contatoId = null, Guid? leadId = null,
-        string? descricao = null, DateTime? previsaoFechamento = null)
+        string? descricao = null, DateTime? previsaoFechamento = null,
+        EtapaOportunidade etapa = EtapaOportunidade.Prospeccao)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(titulo);
         if (valor < 0)         throw new ArgumentException("Valor não pode ser negativo.", nameof(valor));
@@ -40,6 +42,7 @@ public class Oportunidade
             Titulo             = titulo.Trim(),
             Valor              = valor,
             Probabilidade      = probabilidade,
+            Etapa              = etapa,
             Status             = StatusOportunidade.Aberta,
             Descricao          = descricao?.Trim(),
             PrevisaoFechamento = previsaoFechamento,
@@ -49,6 +52,7 @@ public class Oportunidade
     }
 
     public void Atualizar(string titulo, decimal valor, int probabilidade,
+        EtapaOportunidade etapa,
         string? descricao = null, DateTime? previsaoFechamento = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(titulo);
@@ -59,6 +63,7 @@ public class Oportunidade
         Titulo             = titulo.Trim();
         Valor              = valor;
         Probabilidade      = probabilidade;
+        Etapa              = etapa;
         Descricao          = descricao?.Trim();
         PrevisaoFechamento = previsaoFechamento;
         AlteradoEm        = DateTime.UtcNow;

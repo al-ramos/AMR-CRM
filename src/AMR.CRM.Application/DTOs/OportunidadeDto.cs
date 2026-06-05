@@ -11,6 +11,8 @@ public record OportunidadeDto(
     string             Titulo,
     decimal            Valor,
     int                Probabilidade,
+    EtapaOportunidade  Etapa,
+    string             EtapaNome,
     StatusOportunidade Status,
     string             StatusNome,
     string?            Descricao,

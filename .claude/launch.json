@@ -2,11 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "amr-crm-api",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "C:\\GitHub\\AMR\\AMR-CRM\\src\\AMR.CRM.API"],
+      "port": 5187
+    },
+    {
       "name": "amr-crm-web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 5176,
-      "cwd": "C:\\GitHub\\AMR-CRM\\frontend"
+      "runtimeArgs": ["--prefix", "C:\\GitHub\\AMR\\AMR-CRM\\frontend", "run", "dev"],
+      "port": 5176
     }
   ]
 }

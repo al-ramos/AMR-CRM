@@ -1,17 +1,19 @@
 using AMR.CRM.Application.DTOs;
 using AMR.CRM.Application.Interfaces;
 using AMR.CRM.Domain.Entities;
+using AMR.CRM.Domain.Enums;
 
 namespace AMR.CRM.Application.Oportunidades.Commands;
 
 public record CriarOportunidadeCommand(
-    string    Titulo,
-    decimal   Valor,
-    int       Probabilidade      = 50,
-    Guid?     ContatoId          = null,
-    Guid?     LeadId             = null,
-    string?   Descricao          = null,
-    DateTime? PrevisaoFechamento = null
+    string            Titulo,
+    decimal           Valor,
+    int               Probabilidade      = 50,
+    EtapaOportunidade Etapa              = EtapaOportunidade.Prospeccao,
+    Guid?             ContatoId          = null,
+    Guid?             LeadId             = null,
+    string?           Descricao          = null,
+    DateTime?         PrevisaoFechamento = null
 ) : IRequest<Result<OportunidadeDto>>;
 
 public class CriarOportunidadeCommandHandler(
@@ -44,7 +46,7 @@ public class CriarOportunidadeCommandHandler(
         }
 
         var op = Oportunidade.Criar(req.Titulo, req.Valor, req.Probabilidade,
-            req.ContatoId, req.LeadId, req.Descricao, req.PrevisaoFechamento);
+            req.ContatoId, req.LeadId, req.Descricao, req.PrevisaoFechamento, req.Etapa);
 
         await repo.AdicionarAsync(op, ct);
         await uow.SaveChangesAsync(ct);
@@ -52,6 +54,7 @@ public class CriarOportunidadeCommandHandler(
         return Result.Ok(new OportunidadeDto(
             op.Id, op.ContatoId, contatoNome, op.LeadId, leadNome,
             op.Titulo, op.Valor, op.Probabilidade,
+            op.Etapa, op.Etapa.ToString(),
             op.Status, op.Status.ToString(),
             op.Descricao, op.PrevisaoFechamento, op.CriadoEm
         ));

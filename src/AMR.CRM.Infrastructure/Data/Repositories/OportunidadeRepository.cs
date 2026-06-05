@@ -33,4 +33,7 @@ public class OportunidadeRepository(AmrCrmDbContext ctx) : IOportunidadeReposito
 
     public void Atualizar(Oportunidade oportunidade)
         => ctx.Oportunidades.Update(oportunidade);
+
+    public void Remover(Oportunidade oportunidade)
+        => ctx.Oportunidades.Remove(oportunidade);
 }

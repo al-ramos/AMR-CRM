@@ -9,4 +9,5 @@ public interface IOportunidadeRepository
     Task<List<Oportunidade>>  ListarPorContatoAsync(Guid contatoId, CancellationToken ct = default);
     Task                      AdicionarAsync(Oportunidade oportunidade, CancellationToken ct = default);
     void                      Atualizar(Oportunidade oportunidade);
+    void                      Remover(Oportunidade oportunidade);
 }

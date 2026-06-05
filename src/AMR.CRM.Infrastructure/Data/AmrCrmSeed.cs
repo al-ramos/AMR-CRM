@@ -84,31 +84,52 @@ public static class AmrCrmSeed
         var leads    = await ctx.Leads.ToListAsync();
         var contatos = await ctx.Contatos.ToListAsync();
 
-        // Oportunidades vinculadas a Leads
-        var op1 = Oportunidade.Criar("Contrato de fornecimento anual",  120_000m, 30,
+        var op1 = Oportunidade.Criar(
+            "Contrato de fornecimento anual", 120_000m, 30,
             leadId: leads[0].Id,
             descricao: "Proposta enviada. Aguarda aprovação da diretoria.",
-            previsaoFechamento: DateTime.UtcNow.AddDays(45));
+            previsaoFechamento: DateTime.UtcNow.AddDays(45),
+            etapa: EtapaOportunidade.Proposta);
 
-        var op2 = Oportunidade.Criar("Automação linha de produção",     280_000m, 65,
+        var op2 = Oportunidade.Criar(
+            "Automação linha de produção", 280_000m, 65,
             leadId: leads[2].Id,
-            descricao: "Proposta técnica apresentada.",
-            previsaoFechamento: DateTime.UtcNow.AddDays(30));
+            descricao: "Proposta técnica apresentada. Em negociação de escopo.",
+            previsaoFechamento: DateTime.UtcNow.AddDays(30),
+            etapa: EtapaOportunidade.Negociacao);
         op2.IniciarAndamento();
 
-        var op3 = Oportunidade.Criar("Pacote software MES — fase 1",    60_000m, 90,
+        var op3 = Oportunidade.Criar(
+            "Pacote software MES — fase 1", 60_000m, 90,
             leadId: leads[3].Id,
-            descricao: "Lead ganho. Oportunidade de expansão.",
-            previsaoFechamento: DateTime.UtcNow.AddDays(15));
+            descricao: "Lead ganho. Oportunidade de expansão — fase 2 planejada.",
+            previsaoFechamento: DateTime.UtcNow.AddDays(15),
+            etapa: EtapaOportunidade.Fechamento);
         op3.Ganhar();
 
-        // Oportunidade vinculada a Contato (legado)
-        var op4 = Oportunidade.Criar("Serviços de manutenção",          36_000m, 50,
+        var op4 = Oportunidade.Criar(
+            "Serviços de manutenção preventiva", 36_000m, 50,
             contatoId: contatos[0].Id,
-            descricao: "Contato cliente existente.",
-            previsaoFechamento: DateTime.UtcNow.AddDays(60));
+            descricao: "Contrato recorrente com cliente existente.",
+            previsaoFechamento: DateTime.UtcNow.AddDays(60),
+            etapa: EtapaOportunidade.Qualificacao);
 
-        ctx.Oportunidades.AddRange(op1, op2, op3, op4);
+        var op5 = Oportunidade.Criar(
+            "Implantação módulo fiscal", 75_000m, 25,
+            leadId: leads[1].Id,
+            descricao: "Primeiro contato. Necessidade identificada.",
+            previsaoFechamento: DateTime.UtcNow.AddDays(90),
+            etapa: EtapaOportunidade.Prospeccao);
+
+        var op6 = Oportunidade.Criar(
+            "Upgrade ERP integrado", 180_000m, 70,
+            contatoId: contatos[2].Id,
+            descricao: "Reunião técnica realizada. Proposta sob análise.",
+            previsaoFechamento: DateTime.UtcNow.AddDays(20),
+            etapa: EtapaOportunidade.Negociacao);
+        op6.IniciarAndamento();
+
+        ctx.Oportunidades.AddRange(op1, op2, op3, op4, op5, op6);
         await ctx.SaveChangesAsync();
     }
 }

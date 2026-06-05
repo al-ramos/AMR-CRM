@@ -19,6 +19,7 @@ public class ListarOportunidadesQueryHandler(IOportunidadeRepository repo)
         o.ContatoId, o.Contato?.Nome,
         o.LeadId,    o.Lead?.Nome,
         o.Titulo, o.Valor, o.Probabilidade,
+        o.Etapa, o.Etapa.ToString(),
         o.Status, o.Status.ToString(),
         o.Descricao, o.PrevisaoFechamento, o.CriadoEm
     );
