@@ -90,7 +90,13 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AmrCrmDbContext>();
     db.Database.Migrate();
-    await AmrCrmSeed.AplicarAsync(db);
+    // Todo o seed do CRM e demonstracao — so entra quando pedido. Ver SEED-01.
+    if (app.Configuration.GetValue<bool>("Seed:DadosDemo"))
+    {
+        await AmrCrmSeed.AplicarDemoAsync(db);
+        app.Logger.LogWarning(
+            "Seed:DadosDemo ligado — a base foi populada com dados de demonstracao ficticios.");
+    }
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
