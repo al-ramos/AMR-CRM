@@ -5,12 +5,18 @@ using Microsoft.EntityFrameworkCore;
 namespace AMR.CRM.Infrastructure.Data;
 
 /// <summary>
-/// Seed de dados demo para o AMR-CRM.
+/// Seed de demonstração do AMR-CRM: contatos, leads, oportunidades e atividades
+/// fictícios. Não há aqui nenhum dado de referência — um CRM não tem tabela de
+/// domínio que precise nascer preenchida.
+///
+/// Por isso só roda com Seed:DadosDemo ligado. Antes rodava em qualquer ambiente,
+/// e um banco de produção nascia com uma carteira de leads que não existe. Ver SEED-01.
+///
 /// Idempotente — só insere se as tabelas estiverem vazias.
 /// </summary>
 public static class AmrCrmSeed
 {
-    public static async Task AplicarAsync(AmrCrmDbContext ctx)
+    public static async Task AplicarDemoAsync(AmrCrmDbContext ctx)
     {
         await SeedContatosAsync(ctx);
         await SeedLeadsAsync(ctx);
